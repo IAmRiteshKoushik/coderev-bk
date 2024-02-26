@@ -1,0 +1,5 @@
+# Ignoring node-modules and other devDependencies
+node_modules/
+
+# Ignonring important variable files
+.env
