@@ -26,7 +26,7 @@ app.use("/api/v1/review", reviewRouter);
 app.use("api/v1/history", historyRouter);
 
 // Port mapping
-const PORT: number = 3000;
+const PORT: number = 5000;
 app.listen(PORT, () => console.log(`Listening at PORT: ${PORT}`));
 
 // Database mapping
