@@ -1,46 +1,36 @@
 import mongoose from "mongoose";
+import { User, NameUpdateModel, DeleteUserModel } from "../models/user.model";
 
-const userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema<User>({
     firstName : {
         type: String,
         required: true,
-    },
-    middleName : {
-        type: String,
-        required: false, // optional
     },
     lastName : {
         type: String,
         required: true,
     },
-    username : {
-        type: String,
-        required: true
-    },
     email : {
         type: String,
     },
-    authentication : {
-        password : {
-            type: String,
-            required: true,
-        },
-        salt : {
-            type: String,
-            select: false
-        },
-        sessionToken : {
-            type: String,
-            select: false
-        },
+    projects : {
+        type: Number,
+        required: true,
+        default: 0 
+    },
+    password : {
+        type: String,
+        required: true,
     },
     createdAt : {
         type: Date,
-        required: true
+        required: true,
+        default: Date.now
     },
-    lastUpdatedAt : {
+    updatedAt : {
         type: Date,
         required: true,
+        default: Date.now
     },
     deletedAt : {
         type: Date,
@@ -50,9 +40,76 @@ const userSchema = new mongoose.Schema({
         type: Number,
         required: true,
         enum: [0, 1, 2] // Available only for Mongoose v.5^
-                        // Allows only the values 0, 1 and 2 for the field
+        // 0 - Deleted, 1 - Existing, 2 - Banned
     }
 });
 
-// Actions
-export const UserModel = mongoose.model("users", userSchema);
+const UserModel = mongoose.model("users", userSchema);
+
+export const createUser = async (userData: User) : Promise<User | null> => {
+    try {
+        const newUser = new UserModel(userData);
+        await newUser.save();
+        return newUser;
+    } catch (error) {
+        return null;
+    }
+}
+export const updateUserName = async (email: string, updateData: NameUpdateModel)
+: Promise<User | null> => {
+    try {
+        const updateUser = await UserModel.findOneAndUpdate(
+            { 
+                email 
+            }, 
+            updateData, 
+            { 
+                new: true 
+            }
+        );
+        return updateUser;
+    } catch (error) {
+        return null;
+    }
+}
+
+export const updateProjectCount = async(email: string, increase: boolean)
+: Promise<User | null> => {
+    const count = increase ? 1 : -1;
+    try {
+        const projectCount = UserModel.findOneAndUpdate(
+            { 
+                email 
+            }, 
+            { 
+                $inc: { 
+                    projects: count
+                },
+            }, 
+            { 
+                new: true 
+            }
+        );
+        return projectCount;
+    } catch (error) {
+        return null;
+    }
+}
+
+export const deleteUser = async (email: string, deleteData: DeleteUserModel)
+: Promise<User | null> => {
+    try {
+        const deleteUser = UserModel.findOneAndUpdate(
+            {
+                email
+            },
+            deleteData,
+            {
+                new: true
+            }
+        );
+        return deleteUser;
+    } catch (error) {
+        return null;
+    }
+}
