@@ -4,9 +4,11 @@ import { createProjectHandler,
     deleteProjectHandler, 
     editProjectHandler, 
     getAllProjectsHandler, 
+    deleteFileHandler, 
+    deleteSnipHandler,
     getProjectHandler } from "../controllers/project.controller";
 import { createProjectReview,
-    createSnippetReview,
+    createSnipReview,
     createFileReview,
     getReview } from "../controllers/review.controller";
 
@@ -22,19 +24,19 @@ projectRouter.get("/get-all-projects", authenticate, getAllProjectsHandler);
 
 // GET : @api/project/getProject/:projectId
 // TASK :  Opening a particular project, then listing out files and reviews
-projectRouter.get("/get-project/:projectId", authenticate, getProjectHandler)
+projectRouter.get("/get-project/:project-id", authenticate, getProjectHandler)
 
-// POST : @api/project/review/create
+// GET : @api/project/review/create
 // TASK : Creating a project review
-projectRouter.post("/review/project-review", authenticate, createProjectReview);
+projectRouter.get("/review/project-review", authenticate, createProjectReview);
 
-// POST : @api/project/review/customReview
+// GET : @api/project/review/customReview
 // TASK : Create new review for file[s] under a project
-projectRouter.post("/review/file-review", authenticate, createFileReview);
+projectRouter.get("/review/file-review", authenticate, createFileReview);
 
-// POST : @api/project/review/snippetReview
+// GET : @api/project/review/snippetReview
 // TASK : Create review for a particular snippet
-projectRouter.post("/review/snippet-review", authenticate, createSnippetReview)
+projectRouter.get("/review/snip-review", authenticate, createSnipReview)
 
 // GET : @api/project/review/:reviewId
 // TASK : Opening a particular review
@@ -43,10 +45,18 @@ projectRouter.get("/review/:review-id", authenticate, getReview)
 
 // PATCH : @api/project/editProject/:projectId
 // TASK : Editing the name of project ONLY
-projectRouter.patch("/edit-project/:projectId", authenticate, editProjectHandler);
+projectRouter.patch("/edit-project/:project-id", authenticate, editProjectHandler);
 
 // DELETE : @api/project/:projectId
-// Delete entire project with confirmation status page 
-projectRouter.delete("/delete-project/:projectId", authenticate, deleteProjectHandler);
+// TASK : Delete entire project with confirmation status page 
+projectRouter.delete("/delete-project/:project-id", authenticate, deleteProjectHandler);
+
+// DELETE : @api/project/delete-file/:file-id
+// TASK : Deletes the file and it's associated snippet reviews
+projectRouter.delete("/delete-file/:file-id", authenticate, deleteFileHandler);
+
+// DELETE : @api/project/delete-snippet/:snip-id
+// TASK : Deletes the snippet review only
+projectRouter.delete("/delete-snip/:snip-id", authenticate, deleteSnipHandler);
 
 export default projectRouter;

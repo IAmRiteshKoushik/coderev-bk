@@ -1,7 +1,7 @@
 import express from "express";
 import { authenticate } from "../helpers/token.middleware";
 import {
-    handleLogin, handleRegister, handleDeleteAccount, handleEditProfile
+    handleLogin, handleRegister, handleEditProfile
 } from "../controllers/user.controller"
 
 const userRouter = express.Router();
@@ -13,10 +13,9 @@ userRouter.post("/login", handleLogin);
 userRouter.post("/register", handleRegister);
 
 // PATCH : @api/user/editProfile
-userRouter.patch("/editProfile/:username", authenticate, handleDeleteAccount);
+userRouter.patch("/edit-profile/", authenticate, handleEditProfile);
 
-// DELETE : @api/user/deleteProfile
-userRouter.delete("/deleteProfile/:userId", authenticate, handleEditProfile);
-
+// PATCH : @api/user/editProfile
+userRouter.delete("/delete-profile/:userId", authenticate, handleEditProfile);
 
 export default userRouter;
