@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { User, NameUpdateModel, DeleteUserModel } from "../models/user.model";
+import { User, NameUpdateModel } from "../models/user.model";
 
 const userSchema = new mongoose.Schema<User>({
     firstName : {
@@ -32,10 +32,6 @@ const userSchema = new mongoose.Schema<User>({
         required: true,
         default: Date.now
     },
-    deletedAt : {
-        type: Date,
-        required: false,
-    },
     accountStatus : {
         type: Number,
         required: true,
@@ -44,7 +40,7 @@ const userSchema = new mongoose.Schema<User>({
     }
 });
 
-const UserModel = mongoose.model("users", userSchema);
+export const UserModel = mongoose.model("users", userSchema);
 
 export const checkUserExist = async (email: string): Promise<User | null> => {
     try {
@@ -105,20 +101,3 @@ export const updateProjectCount = async(email: string, increase: boolean)
     }
 }
 
-export const deleteUser = async (email: string, deleteData: DeleteUserModel)
-: Promise<User | null> => {
-    try {
-        const deleteUser = UserModel.findOneAndUpdate(
-            {
-                email
-            },
-            deleteData,
-            {
-                new: true
-            }
-        );
-        return deleteUser;
-    } catch (error) {
-        return null;
-    }
-}
