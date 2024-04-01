@@ -18,9 +18,3 @@ export type NameUpdateModel = {
     updatedAt: Date
 }
 
-export type DeleteUserModel = {
-    updatedAt: Date,
-    deletedAt: Date,
-    projects: number,
-    accountStatus: number
-}

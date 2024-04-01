@@ -1,30 +1,38 @@
-import mongoose from "mongoose";
+import { Review } from "./review.model"
 
 export interface File {
-    _id:            mongoose.Schema.Types.ObjectId,
-    projectId:      mongoose.Schema.Types.ObjectId,
     fileName:       string,
+    projectName:    string,
+    email:          string,
     filePath:       string,
     fileType:       "Python" | "Java" | "JavaScript" | "TypeScript",
     fileSize:       number,
     reviewExist:    boolean,
+    reviews:        Review[], // Handles the reviews generated per file
     createdAt:      Date,
-    updatedAt:      Date
+    updatedAt:      Date,
 }
 
 export type AddReviewFileModel = {
-    _id:            mongoose.Schema.Types.ObjectId,
-    updatedAt:      Date,
+    fileName:       string,
+    projectName:    string,
+    email:          string,
     reviewExist:    boolean,
+    reviews:        Review[],
+    updatedAt:      Date,
 }
 
 export type ReplaceFileModel = {
-    _id:            mongoose.Schema.Types.ObjectId,
+    fileName:       string,
+    projectName:    string,
+    email:          string,
     fileSize:       number,
     fileType:       "Python" | "Java" | "JavaScript" | "TypeScript",
     updatedAt:      Date,
 }
 
 export type DeleteFileModel = {
-    _id:            mongoose.Schema.Types.ObjectId,
+    fileName:       string,
+    projectName:    string,
+    email:          string,
 }

@@ -1,7 +1,4 @@
-import mongoose from "mongoose"
-
 export interface Project {
-    _id:            mongoose.Schema.Types.ObjectId,
     projectName:    string,
     email:          string,
     fileCount:      number,
@@ -11,8 +8,9 @@ export interface Project {
 }
 
 export type ChangeFilesModel = {
-    _id:        mongoose.Schema.Types.ObjectId,
-    fileCount:  number,
-    updatedAt:  Date
+    projectName:    string,
+    email:          string,
+    fileCount:      number,
+    updatedAt:      Date
 }
 
