@@ -6,8 +6,6 @@ export interface User {
     password: string,
     createdAt: Date,
     updatedAt: Date,
-    deletedAt: Date,
-    accountStatus: number
 }
 
 // Whenever there is an edit of user profile, the last updated time 

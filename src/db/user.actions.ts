@@ -32,12 +32,6 @@ const userSchema = new mongoose.Schema<User>({
         required: true,
         default: Date.now
     },
-    accountStatus : {
-        type: Number,
-        required: true,
-        enum: [0, 1, 2] // Available only for Mongoose v.5^
-        // 0 - Deleted, 1 - Existing, 2 - Banned
-    }
 });
 
 export const UserModel = mongoose.model("users", userSchema);
@@ -60,6 +54,7 @@ export const createUser = async (userData: User) : Promise<User | null> => {
         return null;
     }
 }
+
 export const updateUserName = async (email: string, updateData: NameUpdateModel)
 : Promise<User | null> => {
     try {
@@ -97,6 +92,15 @@ export const updateProjectCount = async(email: string, increase: boolean)
         );
         return projectCount;
     } catch (error) {
+        return null;
+    }
+}
+
+export const deleteUser = async (email: string): Promise<User | null> => {
+    try {
+        const deleteConfirm = await UserModel.findOneAndDelete({ email });
+        return deleteConfirm;
+    } catch (err){
         return null;
     }
 }
