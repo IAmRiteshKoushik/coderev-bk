@@ -46,6 +46,15 @@ const userSchema = new mongoose.Schema<User>({
 
 const UserModel = mongoose.model("users", userSchema);
 
+export const checkUserExist = async (email: string): Promise<User | null> => {
+    try {
+        const data = await UserModel.findOne({ email });
+        return data;
+    } catch (error){
+        return null;
+    }
+}
+
 export const createUser = async (userData: User) : Promise<User | null> => {
     try {
         const newUser = new UserModel(userData);
