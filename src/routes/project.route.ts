@@ -2,7 +2,7 @@ import express from "express";
 import { authenticate } from "../helpers/token.middleware";
 import { createProjectHandler, 
     deleteProjectHandler, 
-    editProjectHandler, 
+    // editProjectHandler, 
     getAllProjectsHandler, 
     deleteFileHandler, 
     deleteSnipHandler,
@@ -45,7 +45,7 @@ projectRouter.get("/review/:review-id", authenticate, getReview)
 
 // PATCH : @api/project/editProject/:projectId
 // TASK : Editing the name of project ONLY
-projectRouter.patch("/edit-project/:project-id", authenticate, editProjectHandler);
+// projectRouter.patch("/edit-project/:project-id", authenticate, editProjectHandler);
 
 // DELETE : @api/project/:projectId
 // TASK : Delete entire project with confirmation status page 

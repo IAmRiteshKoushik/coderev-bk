@@ -98,15 +98,15 @@ export const getProjectHandler = async (req: Request, res: Response) => {
 
 }
 
-export const editProjectHandler = async (req: Request, res: Response) => {
-    try {
-        // 1. 
-    } catch (error) {
-        res.status(500).json({
-            message: ErrorMessage.InternalServerError,
-        });
-    }
-}
+// export const editProjectHandler = async (req: Request, res: Response) => {
+//     try {
+//         // 1. 
+//     } catch (error) {
+//         res.status(500).json({
+//             message: ErrorMessage.InternalServerError,
+//         });
+//     }
+// }
 
 export const deleteProjectHandler = async (req: Request, res: Response) => {
     try {
