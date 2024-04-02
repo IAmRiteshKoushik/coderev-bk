@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
-import { ChangeFilesModel, Project } from "../models/project.model";
+import { ChangeFilesModel, Project, ProjectWithId } from "../models/project.model";
 
 const projectSchema = new mongoose.Schema<Project>({
-    _id: mongoose.Schema.Types.ObjectId,
     projectName : {
         type: String,
         required: true,
@@ -11,6 +10,9 @@ const projectSchema = new mongoose.Schema<Project>({
         type: String,
         required: true,
     },
+    description: {
+        type: String,
+    },
     fileCount: {
         type: Number,
         required: true,
@@ -18,7 +20,6 @@ const projectSchema = new mongoose.Schema<Project>({
     tags: {
         // Supported tags : Java, Python, TypeScript, JavaScript
         type: [String],
-        required: false,
         enum: ["Java", "Python", "TypeScript", "JavaScript"]
     },
     createdAt: {
@@ -36,27 +37,27 @@ const projectSchema = new mongoose.Schema<Project>({
 export const ProjectModel = mongoose.model("projects", projectSchema);
 
 // Actions
-export const getAllProjects = async (email: string): Promise<Project[] | null> => {
+export const getAllProjects = async (email: string): Promise<Project[] | null | false> => {
     try {
         const data = await ProjectModel.find({ email });
-        return data;
+        return data; // can return Project[] or null if no data exists
     } catch (error){
-        return null;
+        return false; // Upon error return false
     }
 }
 
 export const createProject = async (projectData: Project)
-    : Promise<Project | null> => {
+    : Promise<ProjectWithId | null> => {
     try {
         const newProject = new ProjectModel(projectData);
-        await newProject.save();
-        return newProject;
+        const confirmSave: any = await newProject.save(); // Need better type
+        return confirmSave;
     } catch (error){
         return null;
     }
 }
 
-export const alterFileCount = async(updateData: ChangeFilesModel)
+export const alterFileCountAndTag = async(updateData: ChangeFilesModel)
     : Promise<boolean> => {
     try {
         const updateProject = await ProjectModel.findOneAndUpdate({ 
@@ -72,16 +73,31 @@ export const alterFileCount = async(updateData: ChangeFilesModel)
     }
 }
 
-export const deleteProject = async (email: string, projectName: string)
-    : Promise<boolean> => {
+export const deleteAllProjects = async(email: string): Promise<boolean> => {
     try {
-        const deleteProject = await ProjectModel.deleteOne({ projectName, email });
-        if(!deleteProject){
+        const deleteConfirm = await ProjectModel.deleteMany({
+            email: email
+        });
+        if(!deleteConfirm){
             return false;
         }
         return true;
-        
     } catch (error){
         return false;
     }
 }
+
+export const deleteProject = async(projectName: string): Promise<boolean> => {
+    try {
+        const deleteConfirm = await ProjectModel.findOneAndDelete({
+            projectName,
+        });
+        if(!deleteConfirm){
+            return false;
+        }
+        return true;
+    } catch (error){
+        return false;
+    }
+}
+
