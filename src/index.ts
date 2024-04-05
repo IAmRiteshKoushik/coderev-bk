@@ -3,6 +3,7 @@ import compression from "compression";
 import cors from "cors";
 import helmet from "helmet";
 import mongoose from "mongoose";
+import process from "node:process";
 
 import testRouter from "./routes/test.route";
 import userRouter from "./routes/user.route";
@@ -15,6 +16,7 @@ app.use(cors({ credentials: true }));
 app.use(compression());
 app.use(express.json());
 app.use(helmet());          
+app.use(express.urlencoded({ extended: false }));
 
 // Route mapping
 app.use("/api/test", testRouter);
@@ -24,38 +26,24 @@ app.use("/api/project", projectRouter);
 // Database mapping
 const defaultURI = "mongodb://localhost:27017/sample"
 const uri = process.env.MONGO_CONNECTION_STRING ?? defaultURI;
-const options = {
-    poolSize: 25,
-    useUnifiedTopology: true,        // Compatibile with lastest MongoDB server version and drivers
-    serverSelectionTimeoutMS: 10000, // 10 seconds idle connection timeout
-}
 
-// Port mapping
+// Initialize server
 const PORT: number = 5000;
+app.listen(PORT, () => {
+    console.log(`Listening at PORT: ${PORT}`)
+});
 
-async function connectMongo(): Promise<void> {
-    try {
-        await mongoose.connect(uri, options);
-        console.log("Database connection established successfully!")
-        // Setup successful connection log
-    } catch (error){
+console.log("Try to establish connection to database");
+mongoose.Promise = Promise;
+mongoose.connect(uri)
+    .then(() => {
+        console.log("Connected to MongoDB successfully")
+        // Setup success log
+    })
+    .catch((error: Error) => {
+        console.log("Could not connect to database. Check crash log");
         // Setup crash log
+        console.log("Aborting server startup");
         process.exit(1);
-    }
-}
+});
 
-async function startServer(): Promise<void> {
-    try {
-        await connectMongo();
-        app.listen(PORT, () => {
-            console.log(`Listening at PORT: ${PORT}`)
-            // Setup successful initialization log
-        });
-        // Setup crash log
-    } catch (error){
-        // Setup crash log 
-        process.exit(1);
-    }
-}
-
-startServer();
