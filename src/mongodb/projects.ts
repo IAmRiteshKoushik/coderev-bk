@@ -3,18 +3,18 @@ import mongoose from "mongoose";
 type validTags = "" | "JavaScript" | "Python" | "Java"
 
 interface Project {
-    projectName: string,
-    email: string,
-    tags: validTags[],
-    codeReviewARN: string,
+    projectName:    string,
+    email:          string,
+    tags:           validTags[],
+    codeReviewARN:  string,
 }
 
 interface ProjectWithId{
-    id: string,
-    projectName: string,
-    email: string,
-    tags: validTags[],
-    codeReviewARN: string,
+    id:             string,
+    projectName:    string,
+    email:          string,
+    tags:           validTags[],
+    codeReviewARN:  string,
 }
 
 
