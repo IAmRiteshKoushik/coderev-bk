@@ -94,9 +94,11 @@ export const updateTags = async(projectId: string, tags: validTags)
         const update = { $set: { tags: tags }};
         const options = { new: true };
         const confirm = await ProjectModel.findOneAndUpdate(filter, update, options);
+
         if(!confirm){
             return false;
         }
+
         const data: ProjectWithId = {
             id: confirm._id.toString(),
             projectName: confirm.projectName,
@@ -117,9 +119,11 @@ export const updateCodeReviewARN = async(projectId: string, codeReviewARN: strin
         const update = { $set: { codeReviewARN: codeReviewARN }};
         const options = { new: true };
         const confirm = await ProjectModel.findOneAndUpdate(filter, update, options);
+
         if(!confirm){
             return false;
         }
+
         const data: ProjectWithId = {
             id: confirm._id.toString(),
             projectName: confirm.projectName,
