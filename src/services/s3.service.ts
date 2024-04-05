@@ -10,18 +10,16 @@ const config = {
 
 const s3Client = new S3Client(config);
 
-export const uploadToS3 = async (projectId: string, fileName: string, 
-    pathToZip: string): Promise<boolean> => {
+export const uploadToS3 = async (pathToZip: string): Promise<boolean> => {
     try {
         const command = new PutObjectCommand({
             Bucket: process.env.S3_BUCKET_NAME ?? "s3-bucket-name",
-            Key: `${projectId}/${fileName}`,
+            Key: `${process.env.REPOSITORY_NAME}/source.zip`,
             Body: pathToZip,
         });
         await s3Client.send(command);
         return true;
     } catch (error){
-        // Setup logs for error
         return false;
     }
 }
