@@ -36,11 +36,9 @@ mongoose.Promise = Promise;
 mongoose.connect(uri)
     .then(() => {
         console.log("Connected to MongoDB successfully")
-        // Setup success log
     })
     .catch((error: Error) => {
         console.log("Could not connect to database. Check crash log");
-        // Setup crash log
         console.log("Aborting server startup");
         process.exit(1);
 });
