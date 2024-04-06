@@ -4,6 +4,7 @@ type validTags = "" | "JavaScript" | "Python" | "Java"
 
 interface Project {
     projectName:    string,
+    description:    string,
     email:          string,
     tags:           validTags[],
     codeReviewARN:  string,
@@ -12,6 +13,7 @@ interface Project {
 interface ProjectWithId{
     id:             string,
     projectName:    string,
+    description:    string,
     email:          string,
     tags:           validTags[],
     codeReviewARN:  string,
@@ -20,6 +22,10 @@ interface ProjectWithId{
 
 const projectSchema = new mongoose.Schema<Project>({
     projectName: {
+        type: String,
+        required: true,
+    },
+    description: {
         type: String,
         required: true,
     },
@@ -38,6 +44,38 @@ const projectSchema = new mongoose.Schema<Project>({
 });
 
 export const ProjectModel = mongoose.model("projects", projectSchema);
+
+export const getAllProjects = async(email: string): Promise<ProjectWithId[] | false> => {
+    try {
+        const filter = { email };
+        const confirm = await ProjectModel.find(filter);
+
+        let data: ProjectWithId[] = [];
+        for(let i: number = 0; i < confirm.length; i++){
+            data.push({
+                id:             confirm[i]._id.toString(),
+                projectName:    confirm[i].projectName,
+                description:    confirm[i].description,
+                email:          confirm[i].email,
+                tags:           confirm[i].tags,
+                codeReviewARN:  confirm[i].codeReviewARN
+            });
+        }
+        return data;
+    } catch(error){
+        return false;
+    }
+}
+
+export const getProject = async(email: string, projectId: string)
+    : Promise<| false> => {
+
+    try {
+        return false;
+    } catch (error){
+        return false;
+    }
+}
 
 export const removeAllProjects = async(email: string)
     : Promise<boolean> => {
@@ -75,11 +113,12 @@ export const createProject = async(projectData: Project)
             return false;
         }
         const data: ProjectWithId = {
-            id: confirm._id.toString(),
-            projectName: confirm.projectName,
-            email: confirm.email,
-            tags: confirm.tags,
-            codeReviewARN: confirm.codeReviewARN,
+            id:             confirm._id.toString(),
+            projectName:    confirm.projectName,
+            description:    confirm.description,
+            email:          confirm.email,
+            tags:           confirm.tags,
+            codeReviewARN:  confirm.codeReviewARN,
         }
         return data;
     } catch (error){
@@ -100,11 +139,12 @@ export const updateTags = async(projectId: string, tags: validTags)
         }
 
         const data: ProjectWithId = {
-            id: confirm._id.toString(),
-            projectName: confirm.projectName,
-            email: confirm.email,
-            tags: confirm.tags,
-            codeReviewARN: confirm.codeReviewARN,
+            id:             confirm._id.toString(),
+            projectName:    confirm.projectName,
+            description:    confirm.description,
+            email:          confirm.email,
+            tags:           confirm.tags,
+            codeReviewARN:  confirm.codeReviewARN,
         }
         return data;
     } catch (error){
@@ -125,14 +165,38 @@ export const updateCodeReviewARN = async(projectId: string, codeReviewARN: strin
         }
 
         const data: ProjectWithId = {
-            id: confirm._id.toString(),
-            projectName: confirm.projectName,
-            email: confirm.email,
-            tags: confirm.tags,
-            codeReviewARN: confirm.codeReviewARN,
+            id:             confirm._id.toString(),
+            projectName:    confirm.projectName,
+            description:    confirm.description,
+            email:          confirm.email,
+            tags:           confirm.tags,
+            codeReviewARN:  confirm.codeReviewARN,
         }
         return data;
     } catch (error){
         return false;
     }
 }
+
+export const checkProjectExist = async(projectId: string, email: string)
+    : Promise<ProjectWithId | false | null> => {
+    try {
+        const filters = { email, _id: projectId };
+        const confirm = await ProjectModel.findOne(filters);
+        if(!confirm){
+            return false;
+        }
+        const data: ProjectWithId = {
+            id:             confirm._id.toString(),
+            projectName:    confirm.projectName,
+            description:    confirm.description,
+            email:          confirm.email,
+            tags:           confirm.tags,
+            codeReviewARN:  confirm.codeReviewARN,
+        }
+        return data;
+    } catch (error){
+        return null;
+    }
+}
+
