@@ -16,6 +16,12 @@ interface UserWithId {
     projectCount:   number
 }
 
+interface UserWithPasswd {
+
+    email:      string,
+    password:   string,
+}
+
 export const userSchema = new mongoose.Schema<User>({
     firstName: {
         type: String,
@@ -41,13 +47,20 @@ export const userSchema = new mongoose.Schema<User>({
 
 export const UserModel = mongoose.model("users", userSchema);
 
-export const checkUserExist = async (email: string): Promise<boolean | null> => {
+export const checkUserExist = async (email: string): Promise<User | false | null> => {
     try {
-        const data = await UserModel.findOne({ email });
-        if (!data){
+        const checkUser = await UserModel.findOne({ email });
+        if (!checkUser){
             return false;
         }
-        return true;
+        const data: User = {
+            firstName: checkUser.firstName,
+            lastName: checkUser.lastName,
+            email: checkUser.email,
+            password: checkUser.password,
+            projectCount: checkUser.projectCount,
+        }
+        return data;
     } catch (error){
         return null;
     }

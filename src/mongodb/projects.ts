@@ -71,6 +71,7 @@ export const getProject = async(email: string, projectId: string)
     : Promise<| false> => {
 
     try {
+        // Not written
         return false;
     } catch (error){
         return false;
@@ -82,10 +83,13 @@ export const removeAllProjects = async(email: string)
     try {
         const filter = { email }
         const confirm = await ProjectModel.deleteMany(filter);
-        if(confirm.deletedCount >= 1){
-            return true;
+        if(confirm.deletedCount < 1){
+            return false;
         }
-        return false;
+        // Clear out files
+        for(let i: number = 0; i < confirm.length; i++){
+
+        }
     } catch (error){
         return false;
     }

@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import bcrypt from "bcrypt";
-import { checkUserExist, createUser, 
-    deleteUser, updateUserName } from "../db/user.actions";
-import { getAllProjects } from "../db/project.actions";
 import { newToken } from "../helpers/token.generate";
 import { ErrorMessage } from "../helpers/errors.helper";
-
+import { createUser, checkUserExist, removeUser, updateUserName } from "../mongodb/users";
+import { getAllProjects, removeAllProjects } from "../mongodb/projects";
+import { removeAllFiles } from "../mongodb/files";
+import { removeProjectFromStorage } from "../helpers/storage.helper";
 
 export const handleLogin = async (req: Request, res: Response) => {
     const { email, password } = req.body;
@@ -25,15 +25,14 @@ export const handleLogin = async (req: Request, res: Response) => {
         // 0 : Existing User, 1 : Banned User
         const user = await checkUserExist(email);
         if (!user){
-            res.send(401).json({
+            res.status(401).json({
                 message: "Invalid username or password."
             });
             return;
         }
 
         // Compare password
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const passwordCheck = await bcrypt.compare(hashedPassword, user.password);
+        const passwordCheck = await bcrypt.compare(password, user.password);
         if (!passwordCheck){
             res.status(401).json({
                 message: "Invalid username or password."
@@ -56,7 +55,7 @@ export const handleLogin = async (req: Request, res: Response) => {
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
-            projectCount: user.projects,
+            projectCount: user.projectCount,
             projectData: projects,
         });
         return;
@@ -83,10 +82,6 @@ export const handleRegister = async (req: Request, res: Response) => {
             return;
         }
 
-        // IMP : Check if user exists beforing registering
-        // Alt : Using the uniqueness of email, had to rely on database 
-        // error handling to check if user exists or not
-        // Taking simpler approach for now!
         const checkUser = await checkUserExist(email);
         if(checkUser){
             res.status(403).json({
@@ -101,17 +96,16 @@ export const handleRegister = async (req: Request, res: Response) => {
             lastName: lastName,
             email: email,
             password: hashedPassword,
-            projects: 0,
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            projectCount: 0,
         });
         if (newUserConfirm === null){
-            res.send(500).json({
+            res.status(500).json({
                 message: ErrorMessage.InternalServerError,
             });
             return;
         }
-        res.send(200).json({
+
+        res.status(200).json({
             message: "Account Created Successfully!"
         });
         return;
@@ -137,18 +131,49 @@ export const handleDeleteAccount = async (req: Request, res: Response) => {
             return;
         }
 
-        const confirmDelete = await deleteUser(email);
-        if(!confirmDelete){
-            res.send(500).json({
+        // 1. Remove user from DB
+        const confirmDeleteUser = await removeUser(email);
+        if(!confirmDeleteUser){
+            res.status(500).json({
                 message: ErrorMessage.InternalServerError,
             });
             return;
         }
+        // 2. Remove all projects from DB after getting the data
+        const confirmGetProjects = await getAllProjects(email);
+        if(confirmGetProjects === false){
+            res.status(500).json({
+                message: ErrorMessage.InternalServerError,
+            });
+            return;
+        }
+            // An account which does not have any projects
+        if(confirmGetProjects.length === 0){
+            res.status(200).json({
+                message: "Account has been successfully deleted",
+            });
+            return;
+        }
+            // An account with projects
+        const confirmDeleteProjects = await removeAllProjects(email);
+        if(!confirmDeleteProjects){
+            res.status(500).json({
+                message: ErrorMessage.InternalServerError,
+            })
+        }
+
+        // 3. Remove all files from DB and project from storage
+        for(let i: number = 0; i < confirmGetProjects.length; i++){
+            const projectId = confirmGetProjects[i].id;
+            await removeAllFiles(projectId);
+            await removeProjectFromStorage(projectId);
+        }
+
+        // If all operations are successful
         res.send(200).json({
             message: "Account closed!",
         });
         return;
-
     } catch (error){
         res.status(500).json({
             message: ErrorMessage.InternalServerError,
@@ -165,6 +190,7 @@ export const handleEditProfile = async (req: Request, res: Response) => {
         const validFName = z.string().min(1).max(50).safeParse(firstName.trim());
         const validLName = z.string().min(1).max(50).safeParse(lastName.trim());
         const validEmail = z.string().email().safeParse(email.trim());
+
         if(!validFName.success || !validLName.success || !validEmail.success){
             res.send(403).json({
                 message: ErrorMessage.InputValidationError,
@@ -172,11 +198,7 @@ export const handleEditProfile = async (req: Request, res: Response) => {
             return;
         }
 
-        const editConfirm = await updateUserName(email, {
-            firstName: firstName, 
-            lastName: lastName, 
-            updatedAt: new Date()
-        });
+        const editConfirm = await updateUserName(email, firstName, lastName);
 
         if(!editConfirm){
             res.status(500).json({

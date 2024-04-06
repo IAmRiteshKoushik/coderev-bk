@@ -7,8 +7,7 @@ interface File {
     recommendations:    Recommendation[],
 }
 
-interface FileWithId {
-    id:                 string,
+interface FileWithId { id:                 string,
     fileName:           string,
     projectId:          string,
     reviewStatus:       "not available" | "pending" | "done",
@@ -67,6 +66,38 @@ const fileSchema = new mongoose.Schema<File>({
 
 const FileModel = mongoose.model("files", fileSchema);
 
+export const getFile = async(fileId: string)
+    : Promise<FileWithId | false> => {
+    try {
+        const filter = { fileId };
+        const confirmFile = await FileModel.findOne(filter);
+        if(!confirmFile){
+            return false;
+        }
+        const data: FileWithId = {
+            id:                 confirmFile._id.toString(),
+            fileName:           confirmFile.fileName,
+            projectId:          confirmFile.projectId,
+            reviewStatus:       confirmFile.reviewStatus,
+            recommendations:    confirmFile.recommendations,
+        }
+        return data; 
+    } catch (error) {
+        return false; // File does not exist or some other error 
+    }
+}
+
+export const getFileWithNoReview = async(projectId: string) 
+    :Promise<FileWithId[] | false> =>{
+    try {
+        const data: FileWithId[] = {
+
+        } 
+    } catch (error) {
+        return false; 
+    }
+}
+
 export const removeAllFiles = async(projectId: string)
     : Promise<boolean> => {
     try {
@@ -105,11 +136,11 @@ export const createFile = async(fileData: File)
         }
 
         const data: FileWithId = {
-            id: confirm._id.toString(),
-            fileName: confirm.fileName,
-            projectId: confirm.projectId,
-            reviewStatus: confirm.reviewStatus,
-            recommendations: confirm.recommendations,
+            id:                 confirm._id.toString(),
+            fileName:           confirm.fileName,
+            projectId:          confirm.projectId,
+            reviewStatus:       confirm.reviewStatus,
+            recommendations:    confirm.recommendations,
         }
         return data;
     } catch (error){
@@ -130,11 +161,11 @@ export const updateReviewStatus = async(projectId: string, fileName: string, sta
         }
 
         const data: FileWithId = {
-            id: confirm._id.toString(),
-            fileName: confirm.fileName,
-            projectId: confirm.projectId,
-            reviewStatus: confirm.reviewStatus,
-            recommendations: confirm.recommendations,
+            id:                 confirm._id.toString(),
+            fileName:           confirm.fileName,
+            projectId:          confirm.projectId,
+            reviewStatus:       confirm.reviewStatus,
+            recommendations:    confirm.recommendations,
         }
         return data;
     } catch (error){
@@ -154,11 +185,11 @@ export const addRecommendation = async(projectId: string, fileName: string, reco
         }
 
         const data: FileWithId = {
-            id: confirm._id.toString(),
-            fileName: confirm.fileName,
-            projectId: confirm.projectId,
-            reviewStatus: confirm.reviewStatus,
-            recommendations: confirm.recommendations,
+            id:                 confirm._id.toString(),
+            fileName:           confirm.fileName,
+            projectId:          confirm.projectId,
+            reviewStatus:       confirm.reviewStatus,
+            recommendations:    confirm.recommendations,
         }
         return data;
     } catch (error){

@@ -5,7 +5,6 @@ import helmet from "helmet";
 import mongoose from "mongoose";
 import process from "node:process";
 
-import testRouter from "./routes/test.route";
 import userRouter from "./routes/user.route";
 import projectRouter from "./routes/project.route";
 
@@ -19,7 +18,6 @@ app.use(helmet());
 app.use(express.urlencoded({ extended: false }));
 
 // Route mapping
-app.use("/api/test", testRouter);
 app.use("/api/user", userRouter);
 app.use("/api/project", projectRouter);
 
