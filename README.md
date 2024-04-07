@@ -48,8 +48,8 @@ For more details, visit the [AWS S3 Documentation](https://docs.aws.amazon.com/A
 npm install
 ```
 5. Run the development server:
-# Should run in on PORT 5000 by default
 ```bash
+# Should run in on PORT 5000 by default
 npx esrun src/index.ts
 ```
 > Open the localhost port configured by you in your browser to see the server 
