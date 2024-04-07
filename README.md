@@ -11,7 +11,7 @@ Tech Stack : `Node.js` `Express.js` `MongoDB` `AWS-CodeGuru` `AWS-S3`
 ## Overview
 ![System Design](./screenshots/SystemDesign.png)
 
-- The server accepts files from the frontend and zips and stores the zipped file in `AWS S3` repositories. 
+- The server accepts files from the frontend, zips and stores the zipped file in `AWS S3` repositories. 
 - Meanwhile, it also inserts the corresponding records in the `user` and `project` collections of the database.
 - Next, Code Review is initiated and the recommendations are fetched, and these details are inserted in the database.
 - The frontend acceses all relevent details from the database via  routes in the backend server that handle them.
@@ -20,7 +20,7 @@ Tech Stack : `Node.js` `Express.js` `MongoDB` `AWS-CodeGuru` `AWS-S3`
 `Codeguru` is an AWS service that leverages program analysis and machine learning to identify potential defects and to recommend best practices.
 Improve the maintainability and security of your Java and Python codebase with AWS CodeGuru Reviewer. 
 
-This project uses the `AWS Javascript SDK v3(Typecript)` to access Codeguru and other AWS services.
+This project uses the `AWS Javascript SDK v3(Typescript)` to access Codeguru and other AWS services.
 
 For more details, visit the [AWS Codeguru Reviewer Documentation](https://docs.aws.amazon.com/codeguru/)
 
