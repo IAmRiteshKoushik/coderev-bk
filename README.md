@@ -6,7 +6,7 @@ This repository contains the backend server for the project that connects to Cod
 
 Tech Stack : `Node.js` `Express.js` `MongoDB` `AWS-CodeGuru` `AWS-S3`
 
-**Frontend Repository link**[ here](https://github.com/IAmRiteshKoushik/coderev-web).
+**Frontend Repository link**[here](https://github.com/IAmRiteshKoushik/coderev-web).
 
 ## Overview
 ![System Design](./screenshots/SystemDesign.png)
