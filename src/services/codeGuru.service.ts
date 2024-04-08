@@ -4,6 +4,8 @@ import {
     ListRecommendationsCommand } from '@aws-sdk/client-codeguru-reviewer';
 import { updateCodeReviewARN } from '../mongodb/projects';
 import { addRecommendation } from '../mongodb/files';
+import dotenv from "dotenv";
+dotenv.config();
 
 const associationArn = process.env.ASSOCIATION_ARN ?? "association-arn";
 const config = {
@@ -13,13 +15,13 @@ const config = {
         secretAccessKey: process.env.SECRET_ACCESS_KEY ?? "secret-access-key"
     }
 }
-const cgClient = new CodeGuruReviewerClient(config);
 
+const cgClient = new CodeGuruReviewerClient(config);
 
 export const initiateCodeReview = async (projectId: string): Promise<boolean> => {
     const ObjectKey = `${process.env.REPOSITORY_NAME}/${projectId}/source.zip`;
     const input = {
-        Name: `${new Date(Date.now())}-review`,
+        Name: `${Date.now()}-review`,
         RepositoryAssociationArn: associationArn ?? "association-arn",
         "Type": {
             "AnalysisTypes": ["Security", "CodeQuality"],
@@ -28,7 +30,7 @@ export const initiateCodeReview = async (projectId: string): Promise<boolean> =>
                     "Details": {
                         "BucketName": process.env.S3_BUCKET_NAME ?? "s3-bucket",
                         "CodeArtifacts": {
-                            "SourceCodeArtifactObjectKey": ObjectKey,
+                            "SourceCodeArtifactsObjectKey": ObjectKey,
                         }
                     },
                     "Name": process.env.REPOSITORY_NAME ?? "s3-repository",
@@ -37,23 +39,19 @@ export const initiateCodeReview = async (projectId: string): Promise<boolean> =>
         }
     }
     const data = new CreateCodeReviewCommand(input);
-    const response = await cgClient.send(data);
-    if(!response.CodeReview || !response.CodeReview.CodeReviewArn){
-        console.log("Abort");
-        return false;
-    }
-    // Store the codeReviewARN
-    const arn = response.CodeReview.CodeReviewArn;
     try {
+        const response = await cgClient.send(data);
+        const arn = response.CodeReview.CodeReviewArn;
         await updateCodeReviewARN(projectId, arn);
         return true;
     } catch (error){
         console.log(error);
         return false;
     }
+
 }
 
-export const checkCodeReviewStatus = async(projectId: string, codeReviewARN: string) 
+export const checkCodeReviewStatus = async(codeReviewARN: string) 
     : Promise<false | "pending" | "completed"> => {
     const input = {
         CodeReviewArn: codeReviewARN,
@@ -69,7 +67,6 @@ export const checkCodeReviewStatus = async(projectId: string, codeReviewARN: str
             return false;
         }
     } catch (error){
-        console.log(error);
         return false;
     }
 }
@@ -82,24 +79,19 @@ export const getRecommendations = async(projectId: string, codeReviewARN: string
     try {
         const data = new ListRecommendationsCommand(input);
         const response = await cgClient.send(data);
-        if(!response){
+        if(!response.RecommendationSummaries){
             return false;
         }
         // Mapping
         for(let i: number = 0; i < response.RecommendationSummaries?.length; i++){
             const record = response.RecommendationSummaries[i];
-            const recommend = {
-                description:            record.Description,
-                recommendationCategory: record.RecommendationCategory,
-                severity:               record.Severity,
-                startLine:              record.StartLine,
-                endLine:                record.EndLine,
-            }
-            const fileName = record.FilePath.split("/")[1];
+            const desc = record.Description.split("").join("");
+            const recommend = `In Line ${record.StartLine}: ${record.Description.replace(/\+/g, "")}`;
+            const fileName = record.FilePath?.split("/").pop();
             if(!fileName){
                 return false;
             }
-            const add = addRecommendation(projectId, filePath, recommend);
+            const add = await addRecommendation(projectId, fileName, recommend);
             if(!add){
                 return false;
             }

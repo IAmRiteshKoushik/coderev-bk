@@ -71,7 +71,7 @@ export const getProject = async(email: string, projectId: string)
     : Promise<ProjectWithId| false> => {
 
     try {
-        const filter = { email, _id: projectId};
+        const filter = { _id: projectId};
         const confirm = await ProjectModel.findOne(filter);
         if(!confirm){
             return false;

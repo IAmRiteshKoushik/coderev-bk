@@ -4,41 +4,16 @@ interface File {
     fileName:           string,
     projectId:          string,
     reviewStatus:       "not available" | "pending" | "done",
-    recommendations:    Recommendation[],
+    recommendations:    string,
 }
 
-interface FileWithId { id:                 string,
+interface FileWithId { 
+    id:                 string,
     fileName:           string,
     projectId:          string,
     reviewStatus:       "not available" | "pending" | "done",
-    recommendations:    Recommendation[],
+    recommendations:    string,
 }
-
-interface Recommendation {
-    description:            string,
-    recommendationCategory: string[],
-    severity:               string,
-    startLine:              number,
-    endLine:                number,
-}
-
-const recommendationSchema = new mongoose.Schema<Recommendation>({
-    description: {
-        type: String,
-    },
-    recommendationCategory: {
-        type: [String],
-    },
-    severity: {
-        type: String,
-    },
-    startLine: {
-        type: Number,
-    },
-    endLine: {
-        type: Number,
-    },
-});
 
 const fileSchema = new mongoose.Schema<File>({
     fileName: {
@@ -55,7 +30,7 @@ const fileSchema = new mongoose.Schema<File>({
         enum: ["not available", "pending", "done"]
     },
     recommendations : {
-        type: [recommendationSchema],
+        type: String,
     },
 });
 
@@ -85,8 +60,8 @@ export const getAllFiles = async(projectId: string)
 export const getFile = async(fileId: string)
     : Promise<FileWithId | false> => {
     try {
-        const filter = { _id: fileId };
-        const confirmFile = await FileModel.findOne(filter);
+        console.log(fileId);
+        const confirmFile = await FileModel.findById(fileId);
         if(!confirmFile){
             return false;
         }
@@ -103,33 +78,6 @@ export const getFile = async(fileId: string)
     }
 }
 
-// export const removeAllFiles = async(projectId: string)
-//     : Promise<boolean> => {
-//     try {
-//         const filter = { projectId };
-//         const confirm = FileModel.deleteMany(filter);
-//         if(!confirm){
-//             return false;
-//         }
-//         return true;
-//     } catch (error) {
-//         return false;
-//     }
-// }
-//
-// export const removeFile = async(projectId: string, fileName: string)
-//     : Promise<boolean> => {
-//     try {
-//         const filter = { projectId, fileName };
-//         const confirm = FileModel.deleteOne(filter);
-//         if(!confirm){
-//             return false;
-//         }
-//         return true;
-//     } catch (error){
-//         return false;
-//     }
-// }
 
 export const createFile = async(fileData: File)
     : Promise<FileWithId | false> => {
@@ -171,13 +119,13 @@ export const updateReviewStatus = async(projectId: string, status: string)
     }
 }
 
-export const addRecommendation = async(projectId: string, fileName: string, recommendation: Recommendation) : Promise<FileWithId | false> => {
+export const addRecommendation = async(projectId: string, fileName: string, recommendation: string) : Promise<FileWithId | false> => {
     try {
-        const filter = { projectId, fileName};
-        const update = { $set: { recommendation, reviewStatus : "done" }};
+        const filter = { projectId, fileName };
+        const update = { $set: { recommendations: recommendation, reviewStatus : "done" }};
         const options = { new: true };
         const confirm = await FileModel.findOneAndUpdate(filter, update, options);
-
+        console.log(confirm);
         if(!confirm){
             return false;
         }
@@ -191,6 +139,22 @@ export const addRecommendation = async(projectId: string, fileName: string, reco
         }
         return data;
     } catch (error){
+        return false;
+    }
+}
+
+export const getFileWithNoReview = async(projectId: string)
+: Promise<string[] | false> => {
+    try {
+        const filter = { projectId, reviewStatus: "not available"}
+        const confirm = await FileModel.find(filter);
+        const data: string[] = [];
+        for(let i: number = 0; i < confirm.length; i++){
+            data.push(confirm[i].fileName);
+        }
+        return data;
+    } catch (error){
+        console.log(error);
         return false;
     }
 }

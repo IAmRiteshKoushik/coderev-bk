@@ -32,15 +32,12 @@ app.listen(PORT, () => {
     console.log(`Listening at PORT: ${PORT}`)
 });
 
-console.log("Try to establish connection to database");
 mongoose.Promise = Promise;
 mongoose.connect(uri)
     .then(() => {
-        console.log("Connected to MongoDB successfully")
     })
     .catch((error: Error) => {
-        console.log("Could not connect to database. Check crash log");
-        console.log("Aborting server startup");
+        console.error(error);
         exit(1);
 });
 

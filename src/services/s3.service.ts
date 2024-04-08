@@ -1,4 +1,7 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import dotenv from "dotenv";
+import fs from "fs";
+dotenv.config();
 
 const config = {
     region: process.env.REGION ?? "ap-southeast-1",
@@ -10,15 +13,24 @@ const config = {
 
 const s3Client = new S3Client(config);
 
-export const uploadToS3 = async (pathToZip: string, projectId: string): Promise<boolean> => {
+export const uploadToS3 = async (projectId: string): Promise<boolean> => {
+    const path = `${process.env.STORAGE_UNIT}/${projectId}/source.zip`;
     try {
+        const fileData = fs.readFileSync(path);
         const command = new PutObjectCommand({
             Bucket: process.env.S3_BUCKET_NAME ?? "s3-bucket-name",
             Key: `${process.env.REPOSITORY_NAME}/${projectId}/source.zip`,
-            Body: pathToZip,
+            Body: fileData,
+            ContentType: "application/zip",
         });
-        await s3Client.send(command);
-        return true;
+        try{
+            await s3Client.send(command);
+            console.log("Zip uploaded successfully");
+            return true;
+        } catch (error){
+            console.log(error);
+            return false;
+        }
     } catch (error){
         return false;
     }

@@ -68,16 +68,16 @@ export const createProjectHandler = async (req: Request, res: Response) => {
     }
 }
 
-export const addFileHandler = async (req: Request, res: Response) => {
-    try {
-        
-    } catch (error) {
-        res.status(500).json({
-            message: ErrorMessage.InternalServerError,
-        });
-        return;
-    }
-}
+// export const addFileHandler = async (req: Request, res: Response) => {
+//     try {
+//         
+//     } catch (error) {
+//         res.status(500).json({
+//             message: ErrorMessage.InternalServerError,
+//         });
+//         return;
+//     }
+// }
 
 export const getAllProjectsHandler = async (req: Request, res: Response) => {
     try {
@@ -116,7 +116,6 @@ export const getFileContent = async(req: Request, res: Response) => {
     try {
         const { fileId } = req.body;
         const fileData = await getFile(fileId);
-        console.log(fileData);
         if(!fileData){
             res.status(500).json({
                 message: ErrorMessage.InternalServerError,
@@ -265,7 +264,6 @@ export const verifyUpload = async(req: Request, res: Response, next: NextFunctio
 
     try {
         // Check if there is a project under the particular email
-        console.log(projectId);
         const confirmProject = await checkProjectExistId(projectId, email);
 
         if(confirmProject === null){
