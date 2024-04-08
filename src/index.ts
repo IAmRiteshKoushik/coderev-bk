@@ -3,11 +3,12 @@ import compression from "compression";
 import cors from "cors";
 import helmet from "helmet";
 import mongoose from "mongoose";
-import process from "node:process";
-
+import { exit } from "node:process";
+import dotenv from "dotenv"
 import userRouter from "./routes/user.route";
 import projectRouter from "./routes/project.route";
 
+dotenv.config();
 const app = express();
 
 // Default Middlewares
@@ -22,8 +23,8 @@ app.use("/api/user", userRouter);
 app.use("/api/project", projectRouter);
 
 // Database mapping
-const defaultURI = "mongodb://localhost:27017/sample"
-const uri = process.env.MONGO_CONNECTION_STRING ?? defaultURI;
+const uri = process.env.MONGODB_URL;
+console.log(uri);
 
 // Initialize server
 const PORT: number = 5000;
@@ -40,6 +41,6 @@ mongoose.connect(uri)
     .catch((error: Error) => {
         console.log("Could not connect to database. Check crash log");
         console.log("Aborting server startup");
-        process.exit(1);
+        exit(1);
 });
 

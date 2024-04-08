@@ -4,9 +4,9 @@ import bcrypt from "bcrypt";
 import { newToken } from "../helpers/token.generate";
 import { ErrorMessage } from "../helpers/errors.helper";
 import { createUser, checkUserExist, removeUser, updateUserName } from "../mongodb/users";
-import { getAllProjects, removeAllProjects } from "../mongodb/projects";
-import { removeAllFiles } from "../mongodb/files";
-import { removeProjectFromStorage } from "../helpers/storage.helper";
+import { getAllProjects } from "../mongodb/projects";
+// import { removeAllProjects } from "../mongodb/projects";
+// import { removeAllFiles } from "../mongodb/files";
 
 export const handleLogin = async (req: Request, res: Response) => {
     const { email, password } = req.body;
@@ -22,7 +22,6 @@ export const handleLogin = async (req: Request, res: Response) => {
 
     try {
         // Check for user existance and account status
-        // 0 : Existing User, 1 : Banned User
         const user = await checkUserExist(email);
         if (!user){
             res.status(401).json({
@@ -42,6 +41,7 @@ export const handleLogin = async (req: Request, res: Response) => {
 
         // Get details from database regarding projects and generate JwtPayload
         const projects = await getAllProjects(email);
+        console.log(projects);
         const claims = {
             firstName: user.firstName,
             lastName: user.lastName,
@@ -55,8 +55,8 @@ export const handleLogin = async (req: Request, res: Response) => {
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
-            projectCount: user.projectCount,
-            projectData: projects,
+            count: user.projectCount,
+            projects: projects,
         });
         return;
     } catch (error){
@@ -117,70 +117,70 @@ export const handleRegister = async (req: Request, res: Response) => {
     }
 }
 
-export const handleDeleteAccount = async (req: Request, res: Response) => {
-    console.log("This route does not work yet!");
-    try {
-        const { email } = req.body;
-
-        // Validator
-        const validEmail = z.string().email().safeParse(email.trim());
-        if(!validEmail.success){
-            res.send(403).json({
-                message: ErrorMessage.InputValidationError,
-            });
-            return;
-        }
-
-        // 1. Remove user from DB
-        const confirmDeleteUser = await removeUser(email);
-        if(!confirmDeleteUser){
-            res.status(500).json({
-                message: ErrorMessage.InternalServerError,
-            });
-            return;
-        }
-        // 2. Remove all projects from DB after getting the data
-        const confirmGetProjects = await getAllProjects(email);
-        if(confirmGetProjects === false){
-            res.status(500).json({
-                message: ErrorMessage.InternalServerError,
-            });
-            return;
-        }
-            // An account which does not have any projects
-        if(confirmGetProjects.length === 0){
-            res.status(200).json({
-                message: "Account has been successfully deleted",
-            });
-            return;
-        }
-            // An account with projects
-        const confirmDeleteProjects = await removeAllProjects(email);
-        if(!confirmDeleteProjects){
-            res.status(500).json({
-                message: ErrorMessage.InternalServerError,
-            })
-        }
-
-        // 3. Remove all files from DB and project from storage
-        for(let i: number = 0; i < confirmGetProjects.length; i++){
-            const projectId = confirmGetProjects[i].id;
-            await removeAllFiles(projectId);
-            await removeProjectFromStorage(projectId);
-        }
-
-        // If all operations are successful
-        res.send(200).json({
-            message: "Account closed!",
-        });
-        return;
-    } catch (error){
-        res.status(500).json({
-            message: ErrorMessage.InternalServerError,
-        });
-        return;
-    }
-}
+// export const handleDeleteAccount = async (req: Request, res: Response) => {
+//     console.log("This route does not work yet!");
+//     try {
+//         const { email } = req.body;
+//
+//         // Validator
+//         const validEmail = z.string().email().safeParse(email.trim());
+//         if(!validEmail.success){
+//             res.send(403).json({
+//                 message: ErrorMessage.InputValidationError,
+//             });
+//             return;
+//         }
+//
+//         // 1. Remove user from DB
+//         const confirmDeleteUser = await removeUser(email);
+//         if(!confirmDeleteUser){
+//             res.status(500).json({
+//                 message: ErrorMessage.InternalServerError,
+//             });
+//             return;
+//         }
+//         // 2. Remove all projects from DB after getting the data
+//         const confirmGetProjects = await getAllProjects(email);
+//         if(confirmGetProjects === false){
+//             res.status(500).json({
+//                 message: ErrorMessage.InternalServerError,
+//             });
+//             return;
+//         }
+//             // An account which does not have any projects
+//         if(confirmGetProjects.length === 0){
+//             res.status(200).json({
+//                 message: "Account has been successfully deleted",
+//             });
+//             return;
+//         }
+//             // An account with projects
+//         const confirmDeleteProjects = await removeAllProjects(email);
+//         if(!confirmDeleteProjects){
+//             res.status(500).json({
+//                 message: ErrorMessage.InternalServerError,
+//             })
+//         }
+//
+//         // 3. Remove all files from DB and project from storage
+//         for(let i: number = 0; i < confirmGetProjects.length; i++){
+//             const projectId = confirmGetProjects[i].id;
+//             await removeAllFiles(projectId);
+//             await removeProjectFromStorage(projectId);
+//         }
+//
+//         // If all operations are successful
+//         res.send(200).json({
+//             message: "Account closed!",
+//         });
+//         return;
+//     } catch (error){
+//         res.status(500).json({
+//             message: ErrorMessage.InternalServerError,
+//         });
+//         return;
+//     }
+// }
 
 export const handleEditProfile = async (req: Request, res: Response) => {
     try {

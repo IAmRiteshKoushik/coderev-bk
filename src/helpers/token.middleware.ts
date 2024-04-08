@@ -12,7 +12,9 @@ export const authenticate = async (req: Request, res: Response,
     try {
         const token = req.header("Authorization")?.replace("Bearer ", "");
         if(!token){
-            res.sendStatus(401);
+            res.status(401).json({
+                message: "Invalid Token"
+            });
             return;
         }
 
@@ -20,7 +22,9 @@ export const authenticate = async (req: Request, res: Response,
         (req as TokenizedRequest).token = decoded; 
         next();
     } catch (error){
-        res.sendStatus(401);
+        res.status(401).json({
+            message: "Could not validate token",
+        });
         return;
     }
 }

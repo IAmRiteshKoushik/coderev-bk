@@ -1,22 +1,21 @@
 import express from "express";
 import { authenticate } from "../helpers/token.middleware";
-import { createProjectHandler, deleteProjectHandler, 
-    getAllProjectsHandler, 
-    deleteFileHandler, 
+import { createProjectHandler, 
+    getAllProjectsHandler, getFileContent,
     getProjectHandler,
-   verifyUpload } from "../controllers/project.controller";
+   verifyUpload, shiftFiles } from "../controllers/project.controller";
 import { handleUpload } from "../helpers/upload.helper";
 import { createProjectReview, getFileReview } from "../controllers/review.controller";
 
 const projectRouter = express.Router();
 
 projectRouter.post("/create-project", authenticate, createProjectHandler);
-projectRouter.get("/get-all-projects", authenticate, getAllProjectsHandler);
-projectRouter.get("/get-project/:project-id", authenticate, getProjectHandler)
-projectRouter.get("/review/project-review", authenticate, createProjectReview);
-projectRouter.get("/review/file-review", authenticate, getFileReview);
-projectRouter.post("/upload-files", authenticate, verifyUpload, handleUpload);
-projectRouter.delete("/delete-project", authenticate, deleteProjectHandler);
-projectRouter.delete("/delete-file", authenticate, deleteFileHandler);
+projectRouter.post("/get-all-projects", authenticate, getAllProjectsHandler);
+projectRouter.post("/get-project", authenticate, getProjectHandler)
+projectRouter.post("/get-file-content", authenticate, getFileContent);
+
+projectRouter.post("/review/project-review", authenticate, createProjectReview);
+projectRouter.post("/review/check-project-review", authenticate, getFileReview);
+projectRouter.post("/upload-files", authenticate, verifyUpload, handleUpload, shiftFiles);
 
 export default projectRouter;

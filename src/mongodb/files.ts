@@ -25,23 +25,18 @@ interface Recommendation {
 const recommendationSchema = new mongoose.Schema<Recommendation>({
     description: {
         type: String,
-        required: true,
     },
     recommendationCategory: {
         type: [String],
-        required: true,
     },
     severity: {
         type: String,
-        required: true,
     },
     startLine: {
         type: Number,
-        required: true
     },
     endLine: {
         type: Number,
-        required: true,
     },
 });
 
@@ -66,10 +61,31 @@ const fileSchema = new mongoose.Schema<File>({
 
 const FileModel = mongoose.model("files", fileSchema);
 
+export const getAllFiles = async(projectId: string)
+    : Promise<FileWithId[] | false> => {
+    try {
+        const confirmFiles = await FileModel.find({ projectId });
+        const data: FileWithId[] = [];
+        for(let i: number = 0; i < confirmFiles.length; i++){
+            const record: FileWithId = {
+                id:                 confirmFiles[i]._id.toString(),
+                fileName:           confirmFiles[i].fileName,
+                projectId:          confirmFiles[i].projectId,
+                reviewStatus:       confirmFiles[i].reviewStatus,
+                recommendations:    confirmFiles[i].recommendations,
+            }
+            data.push(record);
+        }
+        return data;
+    } catch (error){
+        return false;
+    }
+}
+
 export const getFile = async(fileId: string)
     : Promise<FileWithId | false> => {
     try {
-        const filter = { fileId };
+        const filter = { _id: fileId };
         const confirmFile = await FileModel.findOne(filter);
         if(!confirmFile){
             return false;
@@ -87,44 +103,33 @@ export const getFile = async(fileId: string)
     }
 }
 
-export const getFileWithNoReview = async(projectId: string) 
-    :Promise<FileWithId[] | false> =>{
-    try {
-        const data: FileWithId[] = {
-
-        } 
-    } catch (error) {
-        return false; 
-    }
-}
-
-export const removeAllFiles = async(projectId: string)
-    : Promise<boolean> => {
-    try {
-        const filter = { projectId };
-        const confirm = FileModel.deleteMany(filter);
-        if(!confirm){
-            return false;
-        }
-        return true;
-    } catch (error) {
-        return false;
-    }
-}
-
-export const removeFile = async(projectId: string, fileName: string)
-    : Promise<boolean> => {
-    try {
-        const filter = { projectId, fileName };
-        const confirm = FileModel.deleteOne(filter);
-        if(!confirm){
-            return false;
-        }
-        return true;
-    } catch (error){
-        return false;
-    }
-}
+// export const removeAllFiles = async(projectId: string)
+//     : Promise<boolean> => {
+//     try {
+//         const filter = { projectId };
+//         const confirm = FileModel.deleteMany(filter);
+//         if(!confirm){
+//             return false;
+//         }
+//         return true;
+//     } catch (error) {
+//         return false;
+//     }
+// }
+//
+// export const removeFile = async(projectId: string, fileName: string)
+//     : Promise<boolean> => {
+//     try {
+//         const filter = { projectId, fileName };
+//         const confirm = FileModel.deleteOne(filter);
+//         if(!confirm){
+//             return false;
+//         }
+//         return true;
+//     } catch (error){
+//         return false;
+//     }
+// }
 
 export const createFile = async(fileData: File)
     : Promise<FileWithId | false> => {
@@ -132,6 +137,7 @@ export const createFile = async(fileData: File)
         const confirm = await FileModel.create(fileData);
 
         if(!confirm){
+            console.log(confirm);
             return false;
         }
 
@@ -142,32 +148,24 @@ export const createFile = async(fileData: File)
             reviewStatus:       confirm.reviewStatus,
             recommendations:    confirm.recommendations,
         }
+        console.log(data);
         return data;
     } catch (error){
         return false;
     }
 }
 
-export const updateReviewStatus = async(projectId: string, fileName: string, status: string)
-    : Promise<FileWithId | false> => {
+export const updateReviewStatus = async(projectId: string, status: string)
+    : Promise<boolean> => {
     try {
-        const filter = { projectId, fileName};
+        const filter = { projectId };
         const update = { $set: { reviewStatus: status}};
         const options = { new: true };
-        const confirm = await FileModel.findOneAndUpdate(filter, update, options);
-
+        const confirm = await FileModel.updateMany(filter, update, options);
         if(!confirm){
             return false;
         }
-
-        const data: FileWithId = {
-            id:                 confirm._id.toString(),
-            fileName:           confirm.fileName,
-            projectId:          confirm.projectId,
-            reviewStatus:       confirm.reviewStatus,
-            recommendations:    confirm.recommendations,
-        }
-        return data;
+        return true;
     } catch (error){
         return false;
     }

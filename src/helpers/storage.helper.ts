@@ -2,6 +2,8 @@ import { exec } from "child_process";
 import JSZip from "jszip";
 import { createWriteStream } from "node:fs";
 import { readFile } from "node:fs/promises";
+import dotenv from "dotenv";
+dotenv.config();
 
 const MULTER_STORE = process.env.TEMP_STORAGE ?? "temp-store-here";
 const STORAGE_UNIT = process.env.STORAGE_UNIT ?? "storage-unit-here";
@@ -13,6 +15,7 @@ const STORAGE_UNIT = process.env.STORAGE_UNIT ?? "storage-unit-here";
 export const createProjectStorage = async (projectId: string) 
     : Promise<boolean> => {
     try {
+        console.log(`mkdir ${STORAGE_UNIT}/${projectId}`);
         exec(`mkdir ${STORAGE_UNIT}/${projectId}`);
         return true;
     } catch (error){
@@ -30,24 +33,35 @@ export const addFilesToStorage = async (projectId: string)
     }
 }
 
-export const removeProjectFromStorage = async(projectId: string)
-    : Promise<boolean> => {
-    try {
-        exec(`rm -rf ${STORAGE_UNIT}/${projectId}`);
-        return true;
-    } catch (error) {
-        return false; 
-    }
-}
+// export const removeProjectFromStorage = async(projectId: string)
+//     : Promise<boolean> => {
+//     try {
+//         exec(`rm -rf ${STORAGE_UNIT}/${projectId}`);
+//         return true;
+//     } catch (error) {
+//         return false; 
+//     }
+// }
+//
+// export const removeFileFromStorage = async(projectId: string, fileName: string)
+//     : Promise<boolean> => {
+//     try {
+//         exec(`rm ${STORAGE_UNIT}/${projectId}/${projectId + "-" + fileName}`);
+//         return true;
+//     } catch (error){ 
+//         return false;
+//     }
+// }
 
-export const removeFileFromStorage = async(projectId: string, fileName: string)
-    : Promise<boolean> => {
-    try {
-        exec(`rm ${STORAGE_UNIT}/${projectId}/${projectId + "-" + fileName}`);
-        return true;
-    } catch (error){ 
-        return false;
-    }
+export const specialZip = async(projectId: string) => {
+    const pathToZip = `${STORAGE_UNIT}/${projectId}/source.zip`
+    exec(`zip -r ${pathToZip} ${STORAGE_UNIT}/${projectId}/`);
+    return pathToZip;
+    // Need better zipping functionality
+}
+export const deleteZip = async(projectId: string) => {
+    exec(`rm ${STORAGE_UNIT}/${projectId}/source.zip`);
+    // Need better deleting functionality
 }
 
 export const zipAndMove = async(projectId: string, fileNames: string[])
@@ -55,7 +69,7 @@ export const zipAndMove = async(projectId: string, fileNames: string[])
     try {
         const zip = new JSZip();
         for(const file of fileNames){
-            const filePath = `${STORAGE_UNIT}/${projectId}/${projectId}-file`;
+            const filePath = `${STORAGE_UNIT}/${projectId}/${file}`;
             const content = await readFile(filePath, 'utf8');
             zip.file(file, content);
         }
@@ -74,6 +88,18 @@ export const zipAndMove = async(projectId: string, fileNames: string[])
         return true;
     } catch (error){
         exec(`rm ${STORAGE_UNIT}/${projectId}/source.zip`);
+        return false;
+    }
+}
+
+export const readFileContent = async(projectId: string, fileName: string) 
+: Promise<string | false> => {
+    try {
+        const data: string = await readFile(`${STORAGE_UNIT}/${projectId}/${fileName}`, 'utf-8');
+        console.log(data);
+        return data;
+    } catch (error){
+        console.log(error);
         return false;
     }
 }
