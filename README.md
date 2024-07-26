@@ -53,7 +53,7 @@ npm install
 npx esrun src/index.ts
 ```
 > Open the localhost port configured by you in your browser to see the server 
-running. By default it should be `http://localhost:3000/`
+running. By default it should be `http://localhost:5000/`
 
 ## Team Members
 
